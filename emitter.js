@@ -22,6 +22,11 @@ function getEmitter() {
          * @param {Function} handler
          */
         on: function (event, context, handler) {
+            if (typeof event !== 'string' ||
+                typeof handler !== 'function' ||
+                typeof context !== 'object') {
+                throw new TypeError();
+            }
             console.info(event, context, handler);
             if (!(event in lectures)) {
                 lectures[event] = [];
@@ -58,7 +63,7 @@ function getEmitter() {
                 if (event in lectures) {
                     lectures[event].forEach(i => i.handler.call(i.context));
                 }
-                event = event.slice(0, event.lastIndexOf('.'));
+                event = event.substring(0, event.lastIndexOf('.'));
             }
 
             return this;
