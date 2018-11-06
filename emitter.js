@@ -11,7 +11,7 @@ const isStar = false;
  * @returns {Object}
  */
 function getEmitter() {
-    let lections = {};
+    let lectures = {};
 
     return {
 
@@ -22,16 +22,11 @@ function getEmitter() {
          * @param {Function} handler
          */
         on: function (event, context, handler) {
-            if (typeof event !== 'string' ||
-                typeof handler !== 'function' ||
-                typeof context !== 'object') {
-                throw new TypeError();
-            }
             console.info(event, context, handler);
-            if (!(event in lections)) {
-                lections[event] = [];
+            if (!(event in lectures)) {
+                lectures[event] = [];
             }
-            lections[event].push({ context, handler });
+            lectures[event].push({ context: context, handler: handler });
 
             return this;
 
@@ -44,9 +39,9 @@ function getEmitter() {
          */
         off: function (event, context) {
             console.info(event, context);
-            for (let e in lections) {
+            for (let e in lectures) {
                 if (e === event || e.startsWith(event + '.')) {
-                    lections[e] = lections[e].filter(i => i.context !== context);
+                    lectures[e] = lectures[e].filter(i => i.context !== context);
                 }
             }
 
@@ -60,8 +55,8 @@ function getEmitter() {
         emit: function (event) {
             console.info(event);
             while (event !== '') {
-                if (event in lections) {
-                    lections[event].forEach(i => i.handler.call(i.context));
+                if (event in lectures) {
+                    lectures[event].forEach(i => i.handler.call(i.context));
                 }
                 event = event.slice(0, event.lastIndexOf('.'));
             }
