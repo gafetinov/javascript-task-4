@@ -4,40 +4,69 @@
  * Сделано задание на звездочку
  * Реализованы методы several и through
  */
-const isStar = true;
+const isStar = false;
 
 /**
  * Возвращает новый emitter
  * @returns {Object}
  */
 function getEmitter() {
+    let lections = {};
+
     return {
 
-        /**
+        /*
          * Подписаться на событие
          * @param {String} event
          * @param {Object} context
          * @param {Function} handler
          */
         on: function (event, context, handler) {
+            if (typeof event !== 'string' ||
+                typeof handler !== 'function' ||
+                typeof context !== 'object') {
+                throw new TypeError();
+            }
             console.info(event, context, handler);
+            if (!(event in lections)) {
+                lections[event] = [];
+            }
+            lections[event].push({ context, handler });
+
+            return this;
+
         },
 
-        /**
+        /*
          * Отписаться от события
          * @param {String} event
          * @param {Object} context
          */
         off: function (event, context) {
             console.info(event, context);
+            for (let e in lections) {
+                if (e === event || e.startsWith(event + '.')) {
+                    lections[e] = lections[e].filter(i => i.context !== context);
+                }
+            }
+
+            return this;
         },
 
-        /**
+        /*
          * Уведомить о событии
          * @param {String} event
          */
         emit: function (event) {
             console.info(event);
+            while (event !== '') {
+                if (event in lections) {
+                    lections[event].forEach(i => i.handler.call(i.context));
+                }
+                event = event.slice(0, event.lastIndexOf('.'));
+            }
+
+            return this;
         },
 
         /**
