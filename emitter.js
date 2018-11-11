@@ -31,7 +31,7 @@ function getEmitter() {
             if (!(event in lectures)) {
                 lectures[event] = [];
             }
-            lectures[event].push({ context: context, handler: handler });
+            lectures[event].push({ context, handler });
 
             return this;
 
@@ -43,10 +43,15 @@ function getEmitter() {
          * @param {Object} context
          */
         off: function (event, context) {
+            if (typeof event !== 'string' ||
+                typeof context !== 'object') {
+                throw new TypeError();
+            }
             console.info(event, context);
-            for (let e in lectures) {
-                if (e === event || e.startsWith(event + '.')) {
-                    lectures[e] = lectures[e].filter(i => i.context !== context);
+            let partOfEvent = event + '.';
+            for (let lecture in lectures) {
+                if (lecture === event || lecture.startsWith(partOfEvent)) {
+                    lectures[lecture] = lectures[lecture].filter(i => i.context !== context);
                 }
             }
 
@@ -58,12 +63,18 @@ function getEmitter() {
          * @param {String} event
          */
         emit: function (event) {
+            if (typeof event !== 'string') {
+                throw new TypeError();
+            }
+            let events = [event];
             console.info(event);
-            while (event !== '') {
-                if (event in lectures) {
-                    lectures[event].forEach(i => i.handler.call(i.context));
+            while (events[events.length - 1] !== '') {
+                let currentEvent = events[events.length - 1];
+                if (currentEvent in lectures) {
+                    lectures[currentEvent]
+                        .forEach(eventData => eventData.handler.call(eventData.context));
                 }
-                event = event.substring(0, event.lastIndexOf('.'));
+                events.push(currentEvent.substring(0, currentEvent.lastIndexOf('.')));
             }
 
             return this;
